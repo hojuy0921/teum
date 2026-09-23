@@ -182,11 +182,12 @@ export class TeumDatabase extends DurableObject {
       CREATE TABLE IF NOT EXISTS images(id TEXT PRIMARY KEY,data TEXT NOT NULL,mime TEXT NOT NULL,created_at TEXT DEFAULT CURRENT_TIMESTAMP);
       CREATE TABLE IF NOT EXISTS submissions(id INTEGER PRIMARY KEY AUTOINCREMENT,type TEXT NOT NULL,nickname TEXT NOT NULL,title TEXT NOT NULL,city TEXT DEFAULT '',price TEXT DEFAULT '',time TEXT DEFAULT '',description TEXT NOT NULL,contact TEXT NOT NULL,consent TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'PENDING',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
     `);
-  }
-
+    );
     try { this.sql.exec("ALTER TABLE posts ADD COLUMN source_submission_id INTEGER"); } catch(e) {}
     this.sql.exec("CREATE INDEX IF NOT EXISTS idx_posts_source_submission ON posts(source_submission_id)");
     this.sql.exec("INSERT OR IGNORE INTO users(username,password_hash,name,city,bio) VALUES(?,?,?,?,?)","__teum_operator__","SYSTEM","TEUM 운영팀","","");
+  }
+
   async fetch(req) {
     const u = new URL(req.url);
     try {
