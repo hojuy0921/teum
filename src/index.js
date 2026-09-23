@@ -185,7 +185,6 @@ export class TeumDatabase extends DurableObject {
       if(m==="GET"&&/^\/api\/image\/[A-Za-z0-9-]+$/.test(u.pathname))return this.image(u.pathname.split("/").pop());
       if(m==="POST"&&u.pathname==="/api/submissions")return this.submitRequest(req);
       if(m==="GET"&&u.pathname==="/api/admin/submissions")return this.adminSubmissions(req);
-      if(m==="POST"&&/^\\/api\\/admin\\/submissions\\/\\d+\\/status$/.test(u.pathname))return this.adminStatus(req,+u.pathname.split("/")[4]);
       return j({error:"Not Found"},404);
     }catch(e){console.error(e);return j({error:"서버 오류가 발생했습니다."},500)}
   }
