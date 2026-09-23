@@ -11,3 +11,6 @@
 배포 구성은 render.yaml에 포함되어 있습니다.
 
 실서비스 데이터와 업로드 파일은 영구 저장이 필요하므로, Render에서 유료 Web Service와 Persistent Disk를 사용하도록 구성되어 있습니다.
+
+
+<!-- Cloudflare redeploy trigger 2026-09-23T22:52:00+09:00 -->
