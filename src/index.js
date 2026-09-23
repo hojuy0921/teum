@@ -67,26 +67,36 @@ const ADMIN="<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\"><met
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
     if (url.pathname === "/apply") {
-      return new Response(APPLY, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
+      return new Response(APPLY, {
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "no-store"
+        }
+      });
     }
+
     if (url.pathname === "/admin") {
-      return new Response(ADMIN, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
+      return new Response(ADMIN, {
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "no-store"
+        }
+      });
     }
-    if (url.pathname === "/apply") {
-      return new Response(APPLY, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
-    }
-    if (url.pathname === "/admin") {
-      return new Response(ADMIN, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
-    }
+
     if (url.pathname.startsWith("/api/")) {
       const id = env.TEUM_DB.idFromName("global");
       return env.TEUM_DB.get(id).fetch(request);
     }
-      const id = env.TEUM_DB.idFromName("global");
-      return env.TEUM_DB.get(id).fetch(request);
-    }
-    return new Response(PAGE,{headers:{"content-type":"text/html; charset=UTF-8","cache-control":"no-store"}});
+
+    return new Response(PAGE, {
+      headers: {
+        "content-type": "text/html; charset=UTF-8",
+        "cache-control": "no-store"
+      }
+    });
   }
 };
 
