@@ -54,7 +54,7 @@ function auth(){if(me){api("/api/logout",{method:"POST"}).then(()=>{me=null;load
 function registerForm(){modal(`<button class="close" onclick="close()">×</button><h2>회원가입</h2><div class="row"><div class="field"><label>아이디</label><input id="rn"></div><div class="field"><label>이름</label><input id="rname"></div></div><div class="field"><label>비밀번호 (6자 이상)</label><input id="rp" type="password"></div><div class="field"><label>지역</label><input id="rc" placeholder="김해"></div><div class="actions"><button class="btn" onclick="close()">취소</button><button class="btn dark" onclick="registerDo()">가입하기</button></div>`)}
 async function loginDo(){try{await api("/api/login",{method:"POST",body:JSON.stringify({username:$("#lu").value,password:$("#lp").value})});await loadMe();close();toast("로그인했습니다.")}catch(e){toast(e.message)}}
 async function registerDo(){try{await api("/api/register",{method:"POST",body:JSON.stringify({username:$("#rn").value,name:$("#rname").value,password:$("#rp").value,city:$("#rc").value})});await loadMe();close();toast("가입되었습니다.")}catch(e){toast(e.message)}}
-function postForm(){if(!me){auth();return}modal(`<button class="close" onclick="close()">×</button><h2>새 글 올리기</h2><div class="row"><div class="field"><label>종류</label><select id="pt">${cats.slice(1).map(c=>`<option>${c}</option>`).join("")}</select></div><div class="field"><label>지역</label><input id="pc" value="${esc(me.city||"")}"></div></div><div class="field"><label>제목</label><input id="ph"></div><div class="field"><label>설명</label><textarea id="pd"></textarea></div><div class="row"><div class="field"><label>가격 / 예산</label><input id="pp" type="number" min="0"></div><div class="field"><label>태그</label><input id="pg" placeholder="기타 악기"></div></div><div class="field"><label>상품 사진 (선택)</label><input id="pi" type="file" accept="image/jpeg,image/png,image/webp"></div><div class="actions"><button class="btn" onclick="close()">취소</button><button class="btn dark" onclick="postDo()">등록하기</button></div>`)}
+function postForm(){location.href="/apply";return;}modal(`<button class="close" onclick="close()">×</button><h2>새 글 올리기</h2><div class="row"><div class="field"><label>종류</label><select id="pt">${cats.slice(1).map(c=>`<option>${c}</option>`).join("")}</select></div><div class="field"><label>지역</label><input id="pc" value="${esc(me.city||"")}"></div></div><div class="field"><label>제목</label><input id="ph"></div><div class="field"><label>설명</label><textarea id="pd"></textarea></div><div class="row"><div class="field"><label>가격 / 예산</label><input id="pp" type="number" min="0"></div><div class="field"><label>태그</label><input id="pg" placeholder="기타 악기"></div></div><div class="field"><label>상품 사진 (선택)</label><input id="pi" type="file" accept="image/jpeg,image/png,image/webp"></div><div class="actions"><button class="btn" onclick="close()">취소</button><button class="btn dark" onclick="postDo()">등록하기</button></div>`)}
 async function postDo(){try{let image="";const f=$("#pi").files[0];if(f){if(f.size>800000)throw Error("사진은 800KB 이하로 올려주세요.");const data=await new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>ok(fr.result);fr.onerror=no;fr.readAsDataURL(f)});image=(await api("/api/upload",{method:"POST",body:JSON.stringify({data})})).url}await api("/api/posts",{method:"POST",body:JSON.stringify({type:$("#pt").value,title:$("#ph").value,description:$("#pd").value,price:$("#pp").value,city:$("#pc").value,tags:$("#pg").value,image})});close();await loadPosts();toast("게시글이 등록되었습니다.")}catch(e){toast(e.message)}}
 async function sendMsg(post_id,receiver_id){try{await api("/api/messages",{method:"POST",body:JSON.stringify({post_id,receiver_id,body:$("#mb").value})});close();toast("메시지를 보냈습니다.")}catch(e){toast(e.message)}}
 async function messages(){if(!me){auth();return}try{const d=await api("/api/messages");modal(`<button class="close" onclick="close()">×</button><h2>메시지</h2>${d.messages.map(m=>`<div style="padding:11px 0;border-bottom:1px solid #eee"><b>${esc(m.sender_name)}</b> · ${esc(m.title)}<p class="small">${esc(m.body)}</p></div>`).join("")||'<div class="empty">메시지가 없습니다.</div>'}`) }catch(e){toast(e.message)}}
@@ -67,7 +67,22 @@ const ADMIN="<!doctype html><html lang=\"ko\"><head><meta charset=\"utf-8\"><met
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+    if (url.pathname === "/apply") {
+      return new Response(APPLY, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
+    }
+    if (url.pathname === "/admin") {
+      return new Response(ADMIN, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
+    }
+    if (url.pathname === "/apply") {
+      return new Response(APPLY, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
+    }
+    if (url.pathname === "/admin") {
+      return new Response(ADMIN, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
+    }
     if (url.pathname.startsWith("/api/")) {
+      const id = env.TEUM_DB.idFromName("global");
+      return env.TEUM_DB.get(id).fetch(request);
+    }
       const id = env.TEUM_DB.idFromName("global");
       return env.TEUM_DB.get(id).fetch(request);
     }
@@ -154,6 +169,10 @@ export class TeumDatabase extends DurableObject {
       if(m==="POST"&&u.pathname==="/api/report")return this.report(req);
       if(m==="POST"&&u.pathname==="/api/submissions")return this.submitRequest(req);
       if(m==="GET"&&u.pathname==="/api/admin/submissions")return this.adminSubmissions(req);
+      if(m==="POST"&&u.pathname.startsWith("/api/admin/submissions/")&&u.pathname.endsWith("/status"))return this.adminStatus(req,+u.pathname.split("/")[4]);
+      if(m==="GET"&&/^\\/api\\/image\\/[A-Za-z0-9-]+$/.test(u.pathname))return this.image(u.pathname.split("/").pop());
+      if(m==="POST"&&u.pathname==="/api/submissions")return this.submitRequest(req);
+      if(m==="GET"&&u.pathname==="/api/admin/submissions")return this.adminSubmissions(req);
       if(m==="POST"&&/^\\/api\\/admin\\/submissions\\/\\d+\\/status$/.test(u.pathname))return this.adminStatus(req,+u.pathname.split("/")[4]);
       return j({error:"Not Found"},404);
     }catch(e){console.error(e);return j({error:"서버 오류가 발생했습니다."},500)}
@@ -172,6 +191,56 @@ export class TeumDatabase extends DurableObject {
   messages(req){const u=this.me(req);if(!u)return j({error:"로그인이 필요합니다."},401);return j({messages:this.sql.exec("SELECT m.*,s.name sender_name,p.title FROM messages m JOIN users s ON s.id=m.sender_id JOIN posts p ON p.id=m.post_id WHERE m.sender_id=? OR m.receiver_id=? ORDER BY m.id ASC LIMIT 200",u.id,u.id).toArray()})}
   review=async(req)=>{const u=this.me(req);if(!u)return j({error:"로그인이 필요합니다."},401);const b=await req.json(),p=this.sql.exec("SELECT * FROM posts WHERE id=?",+b.post_id).toArray()[0];if(!p||p.user_id===u.id)return j({error:"후기를 남길 수 없습니다."},400);try{this.sql.exec("INSERT INTO reviews(reviewer_id,reviewee_id,post_id,rating,body) VALUES(?,?,?,?,?)",u.id,p.user_id,p.id,Math.max(1,Math.min(5,+b.rating||0)),String(b.body||"").slice(0,1000));return j({ok:true},201)}catch{return j({error:"이미 후기를 남겼습니다."},409)}}
   report=async(req)=>{const u=this.me(req);if(!u)return j({error:"로그인이 필요합니다."},401);const b=await req.json();if(!b.reason)return j({error:"신고 사유가 필요합니다."},400);this.sql.exec("INSERT INTO reports(reporter_id,post_id,reason) VALUES(?,?,?)",u.id,b.post_id?+b.post_id:null,String(b.reason).slice(0,1000));return j({ok:true},201)}
+  authorized(req){
+    const expected=String(this.env.TEUM_ADMIN_KEY||"");
+    const got=String(req.headers.get("Authorization")||"").replace(/^Bearer /,"");
+    return Boolean(expected&&got&&got===expected);
+  }
+  async submitRequest(req){
+    const b=await req.json();
+    const v={type:String(b.type||""),nickname:String(b.nickname||"").trim(),title:String(b.title||"").trim(),city:String(b.city||"").trim(),price:String(b.price||"").trim(),time:String(b.time||"").trim(),description:String(b.description||"").trim(),contact:String(b.contact||"").trim(),consent:String(b.consent||"")};
+    if(!TYPES.includes(v.type)||!v.nickname||!v.title||!v.description||!v.contact)return j({error:"필수 항목을 모두 입력해주세요."},400);
+    if(v.consent!=="yes")return j({error:"연결 동의가 필요합니다."},400);
+    if(v.nickname.length>40||v.title.length>120||v.description.length>4000||v.contact.length>300)return j({error:"입력 내용이 너무 깁니다."},400);
+    this.sql.exec("INSERT INTO submissions(type,nickname,title,city,price,time,description,contact,consent,status) VALUES(?,?,?,?,?,?,?,?,?,'PENDING')",v.type,v.nickname,v.title,v.city,v.price,v.time,v.description,v.contact,v.consent);
+    return j({ok:true},201);
+  }
+  adminSubmissions(req){
+    if(!this.authorized(req))return j({error:"관리자 인증이 필요합니다."},401);
+    const rows=this.sql.exec("SELECT * FROM submissions ORDER BY id DESC LIMIT 300").toArray();
+    return j({entries:rows.map(x=>({...x,matches:this.submissionMatches(x.id)})),stats:{total:rows.length,pending:rows.filter(x=>x.status==="PENDING").length}});
+  }
+  submissionMatches(id){
+    const w=this.sql.exec("SELECT * FROM submissions WHERE id=?",id).toArray()[0];
+    if(!w)return [];
+    const otherTypes=w.type==="구합니다"?["팝니다","레슨","서비스","수제품"]:["구합니다"];
+    const q="SELECT id,type,nickname,title,city,price,description FROM submissions WHERE id<>? AND status IN ('PENDING','APPROVED') AND type IN ("+otherTypes.map(()=>"?").join(",")+") ORDER BY id DESC LIMIT 200";
+    const others=this.sql.exec(q,id,...otherTypes).toArray();
+    const wt=new Set((w.title+" "+w.description).toLowerCase().split(/[^0-9a-z가-힣]+/i).filter(x=>x.length>1));
+    return others.map(p=>{
+      let score=0;const pt=(p.title+" "+p.description).toLowerCase();
+      for(const t of wt)if(pt.includes(t))score+=Math.min(4,t.length/3);
+      if(w.city&&p.city&&(w.city.includes(p.city)||p.city.includes(w.city)))score+=3;
+      const wn=Number(w.price.replace(/[^0-9]/g,"")),pn=Number(p.price.replace(/[^0-9]/g,""));
+      if(wn&&pn&&((w.type==="구합니다"&&pn<=wn)||(p.type==="구합니다"&&wn<=pn)))score+=3;
+      return {...p,score:Number(score.toFixed(1))};
+    }).filter(x=>x.score>=3).sort((a,b)=>b.score-a.score).slice(0,6);
+  }
+  async adminStatus(req,id){
+    if(!this.authorized(req))return j({error:"관리자 인증이 필요합니다."},401);
+    const b=await req.json();
+    if(!["PENDING","APPROVED","HIDDEN","REJECTED"].includes(b.status))return j({error:"상태값이 올바르지 않습니다."},400);
+    if(!this.sql.exec("SELECT id FROM submissions WHERE id=?",id).toArray()[0])return j({error:"접수 항목이 없습니다."},404);
+    this.sql.exec("UPDATE submissions SET status=? WHERE id=?",b.status,id);
+    return j({ok:true});
+  }
+  image(id){
+    const x=this.sql.exec("SELECT data,mime FROM images WHERE id=?",id).toArray()[0];
+    if(!x)return new Response("Not Found",{status:404});
+    const bytes=Uint8Array.from(atob(x.data),c=>c.charCodeAt(0));
+    return new Response(bytes,{headers:{"content-type":x.mime,"cache-control":"public,max-age=31536000"}});
+  }
+
 }
 
 async function makeHash(password){const salt=crypto.randomUUID();const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveBits"]);const bits=await crypto.subtle.deriveBits({name:"PBKDF2",salt:new TextEncoder().encode(salt),iterations:120000,hash:"SHA-256"},key,256);return salt+":"+buf(bits)}
