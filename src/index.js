@@ -139,6 +139,9 @@ export default {
         return new Response("<!doctype html><html lang='ko'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>TEUM 오류</title><style>body{font-family:Arial,'Noto Sans KR',sans-serif;background:#f5f2ea;padding:30px}.box{max-width:700px;margin:50px auto;background:#fffdf8;border:1px solid #e5dfd4;border-radius:20px;padding:28px}</style><div class='box'><h1>등록 중 오류가 발생했습니다.</h1><p>잠시 후 다시 시도해주세요.</p><a href='/apply'>등록 페이지로 돌아가기</a></div>", {status: 500, headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
       }
     }
+    if (url.pathname === "/api/admin-check" && request.method === "GET") {
+      return j({version:"1506",adminConfigured:!!String(env.TEUM_ADMIN_KEY||"").trim()});
+    }
     if (url.pathname === "/admin") return new Response(ADMIN, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
     if (url.pathname.startsWith("/api/")) {
       const id = env.TEUM_DB.idFromName("global");
