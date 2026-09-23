@@ -87,7 +87,7 @@ const APPLY = [
 "</head><body><main class='wrap'><div class='brand'>틈 <span style='font-size:10px;color:#888'>TEUM</span></div>",
 "<div class='box'><h1 style='letter-spacing:-.05em'>필요한 것, 팔고 싶은 것,<br>할 수 있는 것을 남겨주세요.</h1>",
 "<p class='muted'>연락처는 공개되지 않습니다. 운영자가 확인한 뒤 조건이 맞는 사람을 연결합니다.</p>",
-"<form method='post' action='/api/submissions'>",
+"<form method='post' action='/apply'>",
 "<div class='field'><label>종류</label><select name='type'><option>구합니다</option><option>팝니다</option><option>레슨</option><option>서비스</option><option>수제품</option></select></div>",
 "<div class='field'><label>닉네임</label><input name='nickname' maxlength='40' required></div>",
 "<div class='field'><label>무엇이 필요한가요 / 무엇을 제공하나요?</label><input name='title' maxlength='120' required></div>",
@@ -105,7 +105,40 @@ const ADMIN = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/apply") return new Response(APPLY, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
+    if (url.pathname === "/apply" && request.method === "GET") {
+      return new Response(APPLY, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
+    }
+    if (url.pathname === "/apply" && request.method === "POST") {
+      try {
+        const form = await request.formData();
+        const body = {
+          type: String(form.get("type") || ""),
+          nickname: String(form.get("nickname") || ""),
+          title: String(form.get("title") || ""),
+          city: String(form.get("city") || ""),
+          price: String(form.get("price") || ""),
+          time: String(form.get("time") || ""),
+          description: String(form.get("description") || ""),
+          contact: String(form.get("contact") || ""),
+          consent: String(form.get("consent") || "")
+        };
+        const apiRequest = new Request(new URL("/api/submissions", request.url), {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify(body)
+        });
+        const id = env.TEUM_DB.idFromName("global");
+        const result = await env.TEUM_DB.get(id).fetch(apiRequest);
+        if (!result.ok) {
+          const data = await result.json().catch(function(){return {};});
+          return new Response(String(data.error || "등록에 실패했습니다."), {status: result.status, headers: {"content-type":"text/plain; charset=utf-8"}});
+        }
+        return new Response("<!doctype html><html lang='ko'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>TEUM 등록 완료</title><style>body{margin:0;background:#f5f2ea;color:#171717;font-family:Arial,'Noto Sans KR',sans-serif}.box{max-width:700px;margin:80px auto;background:#fffdf8;border:1px solid #e5dfd4;border-radius:20px;padding:32px}a{display:inline-block;background:#171717;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:800}</style></head><body><div class='box'><h1>등록 완료</h1><p>TEUM 운영자가 확인하고 조건이 맞는 사람을 찾아 연결해드릴게요.</p><a href='/'>TEUM으로 돌아가기</a></div></body></html>", {status: 201, headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
+      } catch (e) {
+        console.error("apply error", e);
+        return new Response("<!doctype html><html lang='ko'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>TEUM 오류</title><style>body{font-family:Arial,'Noto Sans KR',sans-serif;background:#f5f2ea;padding:30px}.box{max-width:700px;margin:50px auto;background:#fffdf8;border:1px solid #e5dfd4;border-radius:20px;padding:28px}</style><div class='box'><h1>등록 중 오류가 발생했습니다.</h1><p>잠시 후 다시 시도해주세요.</p><a href='/apply'>등록 페이지로 돌아가기</a></div>", {status: 500, headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
+      }
+    }
     if (url.pathname === "/admin") return new Response(ADMIN, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
     if (url.pathname.startsWith("/api/")) {
       const id = env.TEUM_DB.idFromName("global");
