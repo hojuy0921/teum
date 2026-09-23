@@ -158,9 +158,10 @@ export class TeumDatabase extends DurableObject {
         reason TEXT NOT NULL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       );
-    `);
+    `)
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS submissions(id INTEGER PRIMARY KEY AUTOINCREMENT,type TEXT NOT NULL,nickname TEXT NOT NULL,title TEXT NOT NULL,city TEXT DEFAULT "",price TEXT DEFAULT "",time TEXT DEFAULT "",description TEXT NOT NULL,contact TEXT NOT NULL,consent TEXT NOT NULL,status TEXT NOT NULL DEFAULT "PENDING",created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);`);;
   }
-    this.sql.exec(`CREATE TABLE IF NOT EXISTS submissions(id INTEGER PRIMARY KEY AUTOINCREMENT,type TEXT NOT NULL,nickname TEXT NOT NULL,title TEXT NOT NULL,city TEXT DEFAULT "",price TEXT DEFAULT "",time TEXT DEFAULT "",description TEXT NOT NULL,contact TEXT NOT NULL,consent TEXT NOT NULL,status TEXT NOT NULL DEFAULT "PENDING",created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);`);
+
   async fetch(req) {
     const u=new URL(req.url),m=req.method;
     try{
