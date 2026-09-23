@@ -124,16 +124,16 @@ export class TeumDatabase extends DurableObject {
       if(req.method==="POST" && u.pathname==="/api/logout") return this.logout(req);
       if(req.method==="GET" && u.pathname==="/api/posts") return this.posts(u);
       if(req.method==="POST" && u.pathname==="/api/posts") return this.createPost(req);
-      if(req.method==="GET" && /^\\/api\\/posts\\/\\d+$/.test(u.pathname)) return this.post(Number(u.pathname.split("/").pop()));
+      if(req.method==="GET" && new URLPattern({pathname:'/api/posts/:id'}).test(u)) return this.post(Number(u.pathname.split("/").pop()));
       if(req.method==="POST" && u.pathname==="/api/upload") return this.upload(req);
-      if(req.method==="GET" && /^\\/api\\/image\\/[A-Za-z0-9-]+$/.test(u.pathname)) return this.image(u.pathname.split("/").pop());
+      if(req.method==="GET" && new URLPattern({pathname:'/api/image/:id'}).test(u)) return this.image(u.pathname.split("/").pop());
       if(req.method==="POST" && u.pathname==="/api/messages") return this.sendMessage(req);
       if(req.method==="GET" && u.pathname==="/api/messages") return this.messages(req);
       if(req.method==="POST" && u.pathname==="/api/review") return this.review(req);
       if(req.method==="POST" && u.pathname==="/api/report") return this.report(req);
       if(req.method==="POST" && u.pathname==="/api/submissions") return this.submitRequest(req);
       if(req.method==="GET" && u.pathname==="/api/admin/submissions") return this.adminSubmissions(req);
-      if(req.method==="POST" && /^\\/api\\/admin\\/submissions\\/\\d+\\/status$/.test(u.pathname)) return this.adminStatus(req);
+      if(req.method==="POST" && new URLPattern({pathname:'/api/admin/submissions/:id/status'}).test(u)) return this.adminStatus(req);
       return j({error:"Not Found"},404);
     } catch(e) {
       console.error(e);
