@@ -102,7 +102,7 @@ export class TeumDatabase extends DurableObject {
     super(ctx, env);
     this.env = env;
     this.sql = ctx.storage.sql;
-    this.sql.exec(\`
+    this.sql.exec(`
       CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT,username TEXT UNIQUE NOT NULL,password_hash TEXT NOT NULL,name TEXT NOT NULL,city TEXT DEFAULT '',bio TEXT DEFAULT '',created_at TEXT DEFAULT CURRENT_TIMESTAMP);
       CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,user_id INTEGER NOT NULL,expires INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS posts(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL,type TEXT NOT NULL,title TEXT NOT NULL,description TEXT NOT NULL,price INTEGER,city TEXT DEFAULT '',tags TEXT DEFAULT '',image TEXT DEFAULT '',status TEXT DEFAULT 'OPEN',created_at TEXT DEFAULT CURRENT_TIMESTAMP);
@@ -111,7 +111,7 @@ export class TeumDatabase extends DurableObject {
       CREATE TABLE IF NOT EXISTS reports(id INTEGER PRIMARY KEY AUTOINCREMENT,reporter_id INTEGER NOT NULL,post_id INTEGER,reason TEXT NOT NULL,created_at TEXT DEFAULT CURRENT_TIMESTAMP);
       CREATE TABLE IF NOT EXISTS images(id TEXT PRIMARY KEY,data TEXT NOT NULL,mime TEXT NOT NULL,created_at TEXT DEFAULT CURRENT_TIMESTAMP);
       CREATE TABLE IF NOT EXISTS submissions(id INTEGER PRIMARY KEY AUTOINCREMENT,type TEXT NOT NULL,nickname TEXT NOT NULL,title TEXT NOT NULL,city TEXT DEFAULT '',price TEXT DEFAULT '',time TEXT DEFAULT '',description TEXT NOT NULL,contact TEXT NOT NULL,consent TEXT NOT NULL,status TEXT NOT NULL DEFAULT 'PENDING',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
-    \`);
+    `);
   }
 
   async fetch(req) {
