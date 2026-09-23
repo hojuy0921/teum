@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: teum
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: teum-data
+      mountPath: /var/data
+      sizeGB: 10
+    envVars:
+      - key: TEUM_DATA_DIR
+        value: /var/data
