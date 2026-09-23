@@ -2,7 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 
 const TYPES = ["팝니다","구합니다","레슨","서비스","수제품"];
 
-const PAGE = String.raw`<!doctype html>
+const PAGE = `<!doctype html>
 <html lang="ko">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
