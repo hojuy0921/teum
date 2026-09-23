@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "teum",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-23",
+  "observability": { "enabled": true },
+  "durable_objects": {
+    "bindings": [
+      { "name": "TEUM_DB", "class_name": "TeumDatabase" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["TeumDatabase"] }
+  ]
+}
