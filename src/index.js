@@ -249,4 +249,4 @@ function buf(x){return [...new Uint8Array(x)].map(v=>v.toString(16).padStart(2,"
 function cookies(req){return Object.fromEntries((req.headers.get("Cookie")||"").split(";").filter(Boolean).map(x=>{const i=x.indexOf("=");return [x.slice(0,i).trim(),decodeURIComponent(x.slice(i+1))]}))}
 function safeUser(x){return {id:x.id,username:x.username,name:x.name,city:x.city,bio:x.bio}}
 function j(d,s=200,h={}){return new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...h}})}
-function sessionResponse(db,id){const token=crypto.randomUUID()+crypto.randomUUID();db.sql.exec("INSERT INTO sessions(token,user_id,expires) VALUES(?,?,?)",token,id,Date.now()+2592000000);return j({ok:true},{status:200,headers:{"Set-Cookie":`teum=${token}; HttpOnly; Path=/; SameSite=Lax; Secure; Max-Age=2592000`}})}
+function sessionResponse(db,id){const token=crypto.randomUUID()+crypto.randomUUID();db.sql.exec("INSERT INTO sessions(token,user_id,expires) VALUES(?,?,?)",token,id,Date.now()+2592000000);return j({ok:true},200,{"Set-Cookie":`teum=${token}; HttpOnly; Path=/; SameSite=Lax; Secure; Max-Age=2592000`})}
