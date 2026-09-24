@@ -124,7 +124,7 @@ export default {
         };
         const apiRequest = new Request(new URL("/api/submissions", request.url), {
           method: "POST",
-          headers: {"Content-Type":"application/json"},
+          headers: {"Content-Type":"application/json", "Cookie": request.headers.get("Cookie") || ""},
           body: JSON.stringify(body)
         });
         const id = env.TEUM_DB.idFromName("global");
@@ -185,6 +185,7 @@ export class TeumDatabase extends DurableObject {
       CREATE TABLE IF NOT EXISTS post_matches(id INTEGER PRIMARY KEY AUTOINCREMENT,wanted_submission_id INTEGER NOT NULL,post_id INTEGER NOT NULL,status TEXT NOT NULL DEFAULT 'MATCHED',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,UNIQUE(wanted_submission_id,post_id));
     `);
     this.sql.exec("INSERT OR IGNORE INTO users(username,password_hash,name,city,bio) VALUES(?,?,?,?,?)","__teum_operator__","SYSTEM","TEUM 운영팀","","");
+    try { this.sql.exec("ALTER TABLE submissions ADD COLUMN user_id INTEGER"); } catch(e) {}
   }
 
   async fetch(req) {
@@ -229,25 +230,35 @@ export class TeumDatabase extends DurableObject {
   async review(req){const u=this.me(req);if(!u)return j({error:"로그인이 필요합니다."},401);const b=await req.json(),p=this.sql.exec("SELECT * FROM posts WHERE id=?",Number(b.post_id)).toArray()[0];if(!p||p.user_id===u.id)return j({error:"후기를 남길 수 없습니다."},400);const rating=Math.max(1,Math.min(5,Number(b.rating)||0));try{this.sql.exec("INSERT INTO reviews(reviewer_id,reviewee_id,post_id,rating,body) VALUES(?,?,?,?,?)",u.id,p.user_id,p.id,rating,String(b.body||"").slice(0,1000));return j({ok:true},201)}catch(e){return j({error:"이미 후기를 남겼습니다."},409)}}
   async report(req){const u=this.me(req);if(!u)return j({error:"로그인이 필요합니다."},401);const b=await req.json();if(!b.reason)return j({error:"신고 사유가 필요합니다."},400);this.sql.exec("INSERT INTO reports(reporter_id,post_id,reason) VALUES(?,?,?)",u.id,b.post_id?Number(b.post_id):null,String(b.reason).slice(0,1000));return j({ok:true},201)}
   authorizedKey(req){return req.headers.get("x-teum-admin-internal")==="1"}
-  async submitRequest(req){const ct=String(req.headers.get("content-type")||"").toLowerCase();let b={};if(ct.includes("application/json")){b=await req.json()}else{const f=await req.formData();b=Object.fromEntries(f.entries())}const v={type:String(b.type||""),nickname:String(b.nickname||"").trim(),title:String(b.title||"").trim(),city:String(b.city||"").trim(),price:String(b.price||"").trim(),time:String(b.time||"").trim(),description:String(b.description||"").trim(),contact:String(b.contact||"").trim(),consent:String(b.consent||"")};if(!TYPES.includes(v.type)||!v.nickname||!v.title||!v.description||!v.contact||v.consent!=="yes")return j({error:"필수 항목을 모두 입력해주세요."},400);this.sql.exec("INSERT INTO submissions(type,nickname,title,city,price,time,description,contact,consent,status) VALUES(?,?,?,?,?,?,?,?,?,'PENDING')",v.type,v.nickname.slice(0,40),v.title.slice(0,120),v.city.slice(0,80),v.price.slice(0,50),v.time.slice(0,100),v.description.slice(0,4000),v.contact.slice(0,300),v.consent);if(!ct.includes("application/json"))return new Response("<!doctype html><html lang='ko'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>TEUM 등록 완료</title><style>body{margin:0;background:#f5f2ea;color:#171717;font-family:Arial,'Noto Sans KR',sans-serif}.box{max-width:700px;margin:80px auto;background:#fffdf8;border:1px solid #e5dfd4;border-radius:20px;padding:32px}a{display:inline-block;background:#171717;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:800}</style></head><body><div class='box'><h1>등록 완료</h1><p>TEUM 운영자가 확인하고 조건이 맞는 사람을 찾아 연결해드릴게요.</p><a href='/'>TEUM으로 돌아가기</a></div></body></html>",{status:201,headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});return j({ok:true},201)}
+  async submitRequest(req){const ct=String(req.headers.get("content-type")||"").toLowerCase();let b={};if(ct.includes("application/json")){b=await req.json()}else{const f=await req.formData();b=Object.fromEntries(f.entries())}const v={type:String(b.type||""),nickname:String(b.nickname||"").trim(),title:String(b.title||"").trim(),city:String(b.city||"").trim(),price:String(b.price||"").trim(),time:String(b.time||"").trim(),description:String(b.description||"").trim(),contact:String(b.contact||"").trim(),consent:String(b.consent||"")};if(!TYPES.includes(v.type)||!v.nickname||!v.title||!v.description||!v.contact||v.consent!=="yes")return j({error:"필수 항목을 모두 입력해주세요."},400);const owner=this.me(req);this.sql.exec("INSERT INTO submissions(type,nickname,title,city,price,time,description,contact,consent,status,user_id) VALUES(?,?,?,?,?,?,?,?,?,'PENDING',?)",v.type,v.nickname.slice(0,40),v.title.slice(0,120),v.city.slice(0,80),v.price.slice(0,50),v.time.slice(0,100),v.description.slice(0,4000),v.contact.slice(0,300),v.consent,owner?owner.id:null);if(!ct.includes("application/json"))return new Response("<!doctype html><html lang='ko'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>TEUM 등록 완료</title><style>body{margin:0;background:#f5f2ea;color:#171717;font-family:Arial,'Noto Sans KR',sans-serif}.box{max-width:700px;margin:80px auto;background:#fffdf8;border:1px solid #e5dfd4;border-radius:20px;padding:32px}a{display:inline-block;background:#171717;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:800}</style></head><body><div class='box'><h1>등록 완료</h1><p>TEUM 운영자가 확인하고 조건이 맞는 사람을 찾아 연결해드릴게요.</p><a href='/'>TEUM으로 돌아가기</a></div></body></html>",{status:201,headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});return j({ok:true},201)}
   async adminSubmissions(req){if(!this.authorizedKey(req))return j({error:"관리자 인증이 필요합니다."},401);const rows=this.sql.exec("SELECT * FROM submissions ORDER BY id DESC LIMIT 300").toArray();return j({entries:rows.map(x=>Object.assign({},x,{matches:this.submissionMatches(x.id)})),stats:{total:rows.length,pending:rows.filter(x=>x.status==="PENDING").length}})}
-  syncApprovedSubmissions(){const operator=this.sql.exec("SELECT id FROM users WHERE username=?","__teum_operator__").toArray()[0];if(!operator)return;const rows=this.sql.exec("SELECT * FROM submissions WHERE status='APPROVED' ORDER BY id ASC LIMIT 300").toArray();rows.forEach(function(w){const tag="__teum_submission_"+w.id+"__";const existing=this.sql.exec("SELECT id FROM posts WHERE tags=?",tag).toArray()[0];const raw=String(w.price||"").replace(/[^0-9]/g,"");const price=raw?Math.floor(Number(raw)):null;const desc=String(w.description||"")+(w.time?"\n\n가능한 시간: "+String(w.time):"");if(existing)this.sql.exec("UPDATE posts SET type=?,title=?,description=?,price=?,city=?,tags=?,status='OPEN' WHERE id=?",w.type,w.title,desc,price,w.city||"",tag,existing.id);else this.sql.exec("INSERT INTO posts(user_id,type,title,description,price,city,tags,image,status) VALUES(?,?,?,?,?,?,?,?,?)",operator.id,w.type,w.title,desc,price,w.city||"",tag,"","OPEN")}.bind(this))}
+  syncApprovedSubmissions(){const operator=this.sql.exec("SELECT id FROM users WHERE username=?","__teum_operator__").toArray()[0];if(!operator)return;const rows=this.sql.exec("SELECT * FROM submissions WHERE status='APPROVED' ORDER BY id ASC LIMIT 300").toArray();rows.forEach(function(w){const tag="__teum_submission_"+w.id+"__";const ownerId=w.user_id||operator.id;const existing=this.sql.exec("SELECT id FROM posts WHERE tags=?",tag).toArray()[0];const raw=String(w.price||"").replace(/[^0-9]/g,"");const price=raw?Math.floor(Number(raw)):null;const desc=String(w.description||"")+(w.time?"\n\n가능한 시간: "+String(w.time):"");if(existing)this.sql.exec("UPDATE posts SET user_id=?,type=?,title=?,description=?,price=?,city=?,tags=?,status='OPEN' WHERE id=?",ownerId,w.type,w.title,desc,price,w.city||"",tag,existing.id);else this.sql.exec("INSERT INTO posts(user_id,type,title,description,price,city,tags,image,status) VALUES(?,?,?,?,?,?,?,?,?)",ownerId,w.type,w.title,desc,price,w.city||"",tag,"","OPEN")}.bind(this))}
   async adminMatch(req){
     if(!this.authorizedKey(req))return j({error:"관리자 인증이 필요합니다."},401);
     const b=await req.json().catch(function(){return {}});
     const wantedId=Number(b.wanted_id),providerId=Number(b.provider_id),source=String(b.provider_source||"submission");
-    if(!Number.isInteger(wantedId)||!Number.isInteger(providerId))return j({error:"매칭 대상이 올바르지 않습니다."},400);
+    if(!Number.isInteger(wantedId)||!Number.isInteger(providerId)||wantedId===providerId)return j({error:"매칭 대상이 올바르지 않습니다."},400);
     const wanted=this.sql.exec("SELECT * FROM submissions WHERE id=?",wantedId).toArray()[0];
     if(!wanted||wanted.type!=="구합니다"||wanted.status!=="APPROVED")return j({error:"구합니다 항목을 먼저 공개 승인해주세요."},400);
+    let providerUserId=null, providerTitle="";
     if(source==="post"){
-      const p=this.sql.exec("SELECT id,type,status FROM posts WHERE id=?",providerId).toArray()[0];
+      const p=this.sql.exec("SELECT id,type,status,user_id,title FROM posts WHERE id=?",providerId).toArray()[0];
       if(!p||p.status!=="OPEN"||p.type==="구합니다")return j({error:"공개된 제공 게시글을 찾을 수 없습니다."},404);
-      this.sql.exec("INSERT OR IGNORE INTO post_matches(wanted_submission_id,post_id,status) VALUES(?,?,?)",wantedId,providerId,"MATCHED");
-      return j({ok:true,status:"MATCHED"})
+      const exists=this.sql.exec("SELECT id FROM post_matches WHERE wanted_submission_id=? AND post_id=?",wantedId,providerId).toArray()[0];
+      if(!exists)this.sql.exec("INSERT INTO post_matches(wanted_submission_id,post_id,status) VALUES(?,?,?)",wantedId,providerId,"MATCHED");
+      providerUserId=p.user_id;providerTitle=p.title;
+    }else{
+      const provider=this.sql.exec("SELECT * FROM submissions WHERE id=?",providerId).toArray()[0];
+      if(!provider||provider.type==="구합니다"||provider.status!=="APPROVED")return j({error:"공개 승인된 제공 접수를 찾을 수 없습니다."},404);
+      const exists=this.sql.exec("SELECT id FROM matches WHERE wanted_submission_id=? AND provider_submission_id=?",wantedId,providerId).toArray()[0];
+      if(!exists)this.sql.exec("INSERT INTO matches(wanted_submission_id,provider_submission_id,status) VALUES(?,?,?)",wantedId,providerId,"MATCHED");
+      providerUserId=provider.user_id;providerTitle=provider.title;
     }
-    const provider=this.sql.exec("SELECT * FROM submissions WHERE id=?",providerId).toArray()[0];
-    if(!provider||provider.type==="구합니다"||provider.status!=="APPROVED")return j({error:"공개 승인된 제공 접수를 찾을 수 없습니다."},404);
-    this.sql.exec("INSERT OR IGNORE INTO matches(wanted_submission_id,provider_submission_id,status) VALUES(?,?,?)",wantedId,providerId,"MATCHED");
+    const message="TEUM에서 매칭되었습니다.\n구합니다: "+String(wanted.title)+"\n상대: "+String(providerTitle);
+    if(wanted.user_id&&providerUserId){
+      this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body) VALUES(?,?,?,?,?)",0,wanted.user_id,providerUserId,message);
+      this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body) VALUES(?,?,?,?,?)",0,providerUserId,wanted.user_id,message);
+    }
     return j({ok:true,status:"MATCHED"})
   }
   submissionMatches(id){
