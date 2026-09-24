@@ -175,8 +175,8 @@ export default {
     if(["POST","PUT","PATCH","DELETE"].includes(request.method)){const origin=request.headers.get("Origin");if(origin&&origin!==url.origin)return secure(j({error:"잘못된 요청입니다."},403))}
     if(request.method==="POST"){
       let binding="",key="";
-      if(url.pathname==="/api/login"||url.pathname==="/api/register"){binding="TEUM_AUTH_LIMIT";key=(request.headers.get("cf-connecting-ip")||"unknown")+":"+url.pathname}
-      else if(["/api/messages","/api/favorites","/api/block","/api/profile","/api/review","/api/report"].includes(url.pathname)||url.pathname==="/api/upload"||url.pathname==="/api/submissions"||url.pathname.indexOf("/api/posts/")===0){binding="TEUM_WRITE_LIMIT";key=(cookiesFromRequest(request).teum||request.headers.get("cf-connecting-ip")||"unknown")+":"+url.pathname.split("/").slice(0,4).join("/")}
+      if(url.pathname==="/api/login"||url.pathname==="/api/register"||url.pathname==="/api/admin/login"){binding="TEUM_AUTH_LIMIT";key=(request.headers.get("cf-connecting-ip")||"unknown")+":"+url.pathname}
+      else if(["/api/messages","/api/favorites","/api/block","/api/profile","/api/review","/api/report","/api/submissions"].includes(url.pathname)||url.pathname==="/api/upload"||url.pathname==="/apply"||url.pathname.indexOf("/api/posts/")===0){binding="TEUM_WRITE_LIMIT";key=(cookiesFromRequest(request).teum||request.headers.get("cf-connecting-ip")||"unknown")+":"+url.pathname.split("/").slice(0,4).join("/")}
       if(binding&&await limited(env,binding,key))return secure(j({error:"요청이 너무 많습니다. 잠시 후 다시 시도해주세요."},429,{"Retry-After":"60"}));
     }
     if (url.pathname === "/apply" && request.method === "GET") { const sitekey=String(env.TEUM_TURNSTILE_SITEKEY||"").trim(); const html=APPLY.replaceAll("__TEUM_TURNSTILE_SITEKEY__",sitekey).replace("<!--TEUM_TURNSTILE_SCRIPT-->",sitekey?"<script src=\"https://challenges.cloudflare.com/turnstile/v0/api.js\" async defer></script>":"").replace("<!--TURNSTILE_WIDGET-->",sitekey?"<div class=\"cf-turnstile\" data-sitekey=\""+sitekey+"\"></div>":""); return secure(new Response(html,{headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}})); }
