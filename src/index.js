@@ -254,10 +254,12 @@ export class TeumDatabase extends DurableObject {
       if(!exists)this.sql.exec("INSERT INTO matches(wanted_submission_id,provider_submission_id,status) VALUES(?,?,?)",wantedId,providerId,"MATCHED");
       providerUserId=provider.user_id;providerTitle=provider.title;
     }
+    const wantedPost=this.sql.exec("SELECT id FROM posts WHERE tags=? AND status='OPEN' ORDER BY id DESC LIMIT 1","__teum_submission_"+wantedId+"__").toArray()[0];
+    const messagePostId=wantedPost?wantedPost.id:(source==="post"?providerId:0);
     const message="TEUM에서 매칭되었습니다.\n구합니다: "+String(wanted.title)+"\n상대: "+String(providerTitle);
-    if(wanted.user_id&&providerUserId){
-      this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body) VALUES(?,?,?,?,?)",0,wanted.user_id,providerUserId,message);
-      this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body) VALUES(?,?,?,?,?)",0,providerUserId,wanted.user_id,message);
+    if(wanted.user_id&&providerUserId&&messagePostId){
+      this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body) VALUES(?,?,?,?,?)",messagePostId,wanted.user_id,providerUserId,message);
+      this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body) VALUES(?,?,?,?,?)",messagePostId,providerUserId,wanted.user_id,message);
     }
     return j({ok:true,status:"MATCHED"})
   }
