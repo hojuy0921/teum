@@ -144,6 +144,7 @@ loadMe().then(loadPosts);
 const APPLY = [
 "<!doctype html><html lang='ko'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>",
 "<title>TEUM 등록</title>",
+"<!--TEUM_TURNSTILE_SCRIPT-->",
 "<style>body{margin:0;background:#f5f2ea;color:#171717;font-family:Arial,'Noto Sans KR',sans-serif}.wrap{max-width:700px;margin:auto;padding:32px 18px}.brand{font-size:26px;font-weight:900;margin-bottom:28px}.box{background:#fffdf8;border:1px solid #e5dfd4;border-radius:20px;padding:24px}.muted{color:#77716a;font-size:13px;line-height:1.65}.field{margin:13px 0}.field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}.field input,.field textarea,.field select{width:100%;box-sizing:border-box;border:1px solid #ddd5ca;border-radius:10px;padding:12px;background:#fff;font:inherit}.field textarea{min-height:120px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.btn{display:inline-block;border:1px solid #ddd5ca;background:#fff;border-radius:10px;padding:12px 15px;font-weight:800;cursor:pointer;text-decoration:none;color:#171717}.dark{background:#171717;color:#fff;border-color:#171717}@media(max-width:600px){.row{grid-template-columns:1fr}}</style>",
 "</head><body><main class='wrap'><div class='brand'>틈 <span style='font-size:10px;color:#888'>TEUM</span></div>",
 "<div class='box'><h1 style='letter-spacing:-.05em'>필요한 것, 팔고 싶은 것,<br>할 수 있는 것을 남겨주세요.</h1>",
