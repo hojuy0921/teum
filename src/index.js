@@ -145,7 +145,7 @@ export default {
     if (url.pathname === "/admin") return new Response(ADMIN, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});
     if (url.pathname.startsWith("/api/")) {
       const id = env.TEUM_DB.idFromName("global");
-      if (url.pathname === "/api/admin/submissions" || (url.pathname.indexOf("/api/admin/submissions/") === 0 && url.pathname.endsWith("/status"))) {
+      if (url.pathname === "/api/admin/submissions" || (url.pathname.indexOf("/api/admin/submissions/") === 0 && url.pathname.endsWith("/status")) || url.pathname === "/api/admin/matches") {
         if (request.method !== "POST") return j({error:"허용되지 않는 요청입니다."},405);
         const body = await request.json().catch(function(){return {};});
         const expected = String(env.TEUM_ADMIN_KEY || "").trim().normalize("NFKC");
