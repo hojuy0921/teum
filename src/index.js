@@ -8,7 +8,11 @@ const PAGE = String.raw`<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>틈 — 필요한 사람과 할 수 있는 사람</title>
-<meta name="description" content="필요한 사람과 할 수 있는 사람을 연결합니다."><!--TEUM_TURNSTILE_SCRIPT--><meta property="og:type" content="website"><meta property="og:title" content="틈 TEUM — 필요한 사람과 할 수 있는 사람"><meta property="og:description" content="물건, 재능, 시간, 서비스를 서로 연결하는 곳."><meta property="og:url" content="https://teum.hojuy0921.workers.dev"><meta name="twitter:card" content="summary">
+<meta name="description" content="틈(TEUM)은 필요한 사람과 할 수 있는 사람을 연결하는 서비스입니다. 구합니다, 팝니다, 레슨, 서비스, 수제품을 한곳에서 만나보세요.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://teum.hojuy0921.workers.dev/">
+<meta property="og:type" content="website"><meta property="og:title" content="틈 TEUM — 필요한 사람과 할 수 있는 사람"><meta property="og:description" content="물건, 재능, 시간, 서비스를 서로 연결하는 곳."><meta property="og:url" content="https://teum.hojuy0921.workers.dev"><meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"틈 TEUM","url":"https://teum.hojuy0921.workers.dev/","description":"필요한 사람과 할 수 있는 사람을 연결하는 서비스","inLanguage":"ko-KR","potentialAction":{"@type":"SearchAction","target":"https://teum.hojuy0921.workers.dev/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
 <style>
 :root{--bg:#eaf7f6;--paper:#fcffff;--ink:#07343c;--muted:#648087;--line:#d6e8e7;--lime:#29c7b0;--dark:#063b46;--soft:#dff3f0;--ocean:#0a7c8a;--wave:#42bfc8}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 12% -4%,#d7f6f2 0,transparent 28%),radial-gradient(circle at 92% 18%,#dff8ff 0,transparent 23%),linear-gradient(180deg,#eefafa 0%,#eaf7f6 48%,#e5f4f3 100%);color:var(--ink);font-family:Inter,"Noto Sans KR",system-ui,sans-serif;letter-spacing:-.025em}
@@ -182,7 +186,13 @@ export default {
       else if(["/api/messages","/api/messages/match","/api/favorites","/api/block","/api/profile","/api/review","/api/report","/api/submissions","/api/admin/submissions","/api/admin/matches","/api/admin/overview","/api/admin/posts","/api/admin/reports","/api/admin/users","/api/admin/logout"].includes(url.pathname)||url.pathname==="/api/upload"||url.pathname==="/apply"||url.pathname.indexOf("/api/posts/")===0){binding="TEUM_WRITE_LIMIT";key=(cookiesFromRequest(request).teum||request.headers.get("cf-connecting-ip")||"unknown")+":"+url.pathname.split("/").slice(0,4).join("/")}
       if(binding&&await limited(env,binding,key))return secure(j({error:"요청이 너무 많습니다. 잠시 후 다시 시도해주세요."},429,{"Retry-After":"60"}));
     }
-    if (url.pathname === "/apply" && request.method === "GET") { const sitekey=String(env.TEUM_TURNSTILE_SITEKEY||"").trim(); const html=APPLY.replaceAll("__TEUM_TURNSTILE_SITEKEY__",sitekey).replace("<!--TEUM_TURNSTILE_SCRIPT-->",sitekey?"<script src=\"https://challenges.cloudflare.com/turnstile/v0/api.js\" async defer></script>":"").replace("<!--TURNSTILE_WIDGET-->",sitekey?"<div class=\"cf-turnstile\" data-sitekey=\""+sitekey+"\"></div>":""); return secure(new Response(html,{headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}})); }
+    if (url.pathname === "/robots.txt" && request.method === "GET") {
+      return secure(new Response("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://teum.hojuy0921.workers.dev/sitemap.xml\n", {headers: {"content-type":"text/plain; charset=utf-8","cache-control":"public, max-age=3600"}}));
+    }
+    if (url.pathname === "/sitemap.xml" && request.method === "GET") {
+      return secure(new Response("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"><url><loc>https://teum.hojuy0921.workers.dev/</loc></url><url><loc>https://teum.hojuy0921.workers.dev/apply</loc></url></urlset>", {headers: {"content-type":"application/xml; charset=utf-8","cache-control":"public, max-age=3600"}}));
+    }
+    if (url.pathname === "/apply" && request.method === "GET") { const sitekey=String(env.TEUM_TURNSTILE_SITEKEY||"").trim(); const html=APPLY.replaceAll("__TEUM_TURNSTILE_SITEKEY__",sitekey).replace("<!--TEUM_TURNSTILE_SCRIPT-->",sitekey?"<script src=\"https://challenges.cloudflare.com/turnstile/v0/api.js\" async defer></script>":"").replace("<!--TURNSTILE_WIDGET-->",sitekey?"<div class=\"cf-turnstile\" data-sitekey=\""+sitekey+"\"></div>":""); return secure(new Response(html,{headers: {"content-type":"text/html; charset=utf-8","cache-control":"public, max-age=300"}})); }
     if (url.pathname === "/apply" && request.method === "POST") {
       try {
         const form = await request.formData();
