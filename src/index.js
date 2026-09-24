@@ -102,7 +102,7 @@ function modal(h){$("#modal").innerHTML=h;$("#bg").style.display="flex";if(TURNS
 function closeModal(){$("#bg").style.display="none";turnstileWidget=null}
 $("#bg").addEventListener("click",function(e){if(e.target.id==="bg")closeModal()})
 function turnstileToken(){try{return window.turnstile&&turnstileWidget!==null?window.turnstile.getResponse(turnstileWidget):""}catch(e){return ""}}
-function turnstileBox(){return TURNSTILE_SITEKEY?"<div id="turnstileSlot" class="turnstileBox"></div>":""}
+function turnstileBox(){return TURNSTILE_SITEKEY?"<div id='turnstileSlot' class='turnstileBox'></div>":""}
 function toast(t){$("#toast").textContent=t;$("#toast").style.display="block";setTimeout(function(){$("#toast").style.display="none"},1800)}
 $("#pills").innerHTML=cats.map(function(c){return '<button class="btn pill '+(c==="전체"?"active":"")+'" data-cat="'+esc(c)+'">'+esc(c)+'</button>'}).join("")
 document.querySelectorAll(".pill").forEach(function(el){el.addEventListener("click",function(){active=el.getAttribute("data-cat");document.querySelectorAll(".pill").forEach(function(x){x.classList.remove("active")});el.classList.add("active");loadPosts()})})
