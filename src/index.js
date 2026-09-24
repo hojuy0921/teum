@@ -364,7 +364,7 @@ try { const cols=this.sql.exec("PRAGMA table_info(reports)").toArray(); if(!cols
     if(!this.authorizedAdmin(req))return j({error:"관리자 인증이 필요합니다."},401);
     const b=await req.json().catch(function(){return {}});
     const wantedId=Number(b.wanted_id),providerId=Number(b.provider_id),source=String(b.provider_source||"submission");
-    if(!Number.isInteger(wantedId)||!Number.isInteger(providerId)||wantedId===providerId)return j({error:"매칭 대상이 올바르지 않습니다."},400);
+    if(!Number.isInteger(wantedId)||wantedId<1||!Number.isInteger(providerId)||providerId<1)return j({error:"매칭 대상이 올바르지 않습니다."},400);
     const wanted=this.sql.exec("SELECT * FROM submissions WHERE id=?",wantedId).toArray()[0];
     if(!wanted||wanted.type!=="구합니다"||wanted.status!=="APPROVED")return j({error:"구합니다 항목을 먼저 공개 승인해주세요."},400);
     let providerUserId=null, providerTitle="";
@@ -385,16 +385,22 @@ try { const cols=this.sql.exec("PRAGMA table_info(reports)").toArray(); if(!cols
     const messagePostId=wantedPost?wantedPost.id:(source==="post"?providerId:0);
     const message="TEUM에서 매칭되었습니다.\n구합니다: "+String(wanted.title)+"\n상대: "+String(providerTitle);
     if(wanted.user_id&&providerUserId&&messagePostId){
-      this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body) VALUES(?,?,?,?,?)",messagePostId,wanted.user_id,providerUserId,message);
-      this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body) VALUES(?,?,?,?,?)",messagePostId,providerUserId,wanted.user_id,message);
+      try{
+        this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body,is_read) VALUES(?,?,?,?,0)",messagePostId,wanted.user_id,providerUserId,message);
+        this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body,is_read) VALUES(?,?,?,?,0)",messagePostId,providerUserId,wanted.user_id,message);
+      }catch(e){
+        this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body) VALUES(?,?,?,?)",messagePostId,wanted.user_id,providerUserId,message);
+        this.sql.exec("INSERT INTO messages(post_id,sender_id,receiver_id,body) VALUES(?,?,?,?)",messagePostId,providerUserId,wanted.user_id,message);
+      }
+      return j({ok:true,status:"MATCHED",message_connected:true});
     }
-    return j({ok:true,status:"MATCHED"})
+    return j({ok:true,status:"MATCHED",message_connected:false,reason:"계정이 연결되지 않은 접수는 매칭 기록만 저장했습니다."})
   }
   submissionMatches(id){
     const w=this.sql.exec("SELECT * FROM submissions WHERE id=?",id).toArray()[0];
     if(!w)return[];
     const other=w.type==="구합니다"?["팝니다","레슨","서비스","수제품"]:["구합니다"];
-    const a=this.sql.exec("SELECT id,type,nickname,title,city,price,description FROM submissions WHERE id<>? AND status IN ('PENDING','APPROVED') AND type IN ("+other.map(function(){return "?"}).join(",")+") ORDER BY id DESC LIMIT 200",id,...other).toArray().map(function(p){return Object.assign({},p,{source:"submission"})});
+    const a=this.sql.exec("SELECT id,type,nickname,title,city,price,description FROM submissions WHERE id<>? AND status='APPROVED' AND type IN ("+other.map(function(){return "?"}).join(",")+") ORDER BY id DESC LIMIT 200",id,...other).toArray().map(function(p){return Object.assign({},p,{source:"submission"})});
     const posts=this.sql.exec("SELECT p.id,p.type,u.name nickname,p.title,p.city,p.price,p.description FROM posts p JOIN users u ON u.id=p.user_id WHERE p.status='OPEN' AND p.type IN ("+other.map(function(){return "?"}).join(",")+") ORDER BY p.id DESC LIMIT 200",...other).toArray().map(function(p){return Object.assign({},p,{source:"post"})});
     const candidates=a.concat(posts);
     const words=new Set((w.title+" "+w.description).toLowerCase().split(/[^0-9a-z가-힣]+/i).filter(function(x){return x.length>1}));
