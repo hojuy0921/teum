@@ -231,7 +231,7 @@ export default {
         if(!result.ok)return secure(j(data,result.status));
         return secure(j({ok:true},200,{"Set-Cookie":"teum_admin="+encodeURIComponent(String(data.token||""))+"; HttpOnly; Path=/; SameSite=Strict; Secure; Max-Age=28800"}));
       }
-      if (url.pathname === "/api/admin/submissions" || (url.pathname.indexOf("/api/admin/submissions/") === 0 && url.pathname.endsWith("/status")) || url.pathname === "/api/admin/matches") {
+      if (url.pathname.indexOf("/api/admin/") === 0 && url.pathname !== "/api/admin/login") {
         if (request.method !== "POST") return secure(j({error:"허용되지 않는 요청입니다."},405));
         const body = await request.json().catch(function(){return {}});
         const expected = String(env.TEUM_ADMIN_KEY||"").trim().normalize("NFKC");
@@ -239,7 +239,7 @@ export default {
         const adminCookie=cookiesFromRequest(request).teum_admin||"";
         const headers=new Headers({"Content-Type":"application/json"});
         if(actual&&expected&&actual===expected){delete body.key;headers.set("x-teum-admin-internal","1")}
-        else if(adminCookie){headers.set("Cookie","teum_admin="+encodeURIComponent(adminCookie))}
+        else if(adminCookie){headers.set("x-teum-admin-session",decodeURIComponent(adminCookie))}
         else return secure(j({error:"관리자 인증이 필요합니다."},401));
         const forwarded=new Request(new URL(url.pathname+url.search,request.url),{method:"POST",headers:headers,body:JSON.stringify(body)});
         return secure(await env.TEUM_DB.get(id).fetch(forwarded));
