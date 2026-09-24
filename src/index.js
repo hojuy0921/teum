@@ -17,7 +17,7 @@ header{position:sticky;top:0;z-index:30;background:#f9ffffd9;border-bottom:1px s
 .nav{min-height:68px;display:flex;align-items:center;gap:12px}.logo{font-size:25px;font-weight:950;letter-spacing:-.08em;margin-right:auto;text-decoration:none;color:var(--ocean)}.logo small{font-size:10px;color:#8d877e;margin-left:5px}
 .navlinks{display:flex;gap:18px;color:#666158;font-size:14px}.navlinks a{text-decoration:none;color:inherit}
 .btn{border:1px solid #cfe4e2;background:rgba(252,255,255,.9);padding:10px 14px;border-radius:11px;font-weight:800;color:var(--ink);transition:.18s ease}.btn:hover{transform:translateY(-1px);border-color:#a9d4d0}.btn.dark{background:var(--dark);color:#fff;border-color:var(--dark)}.btn.lime{background:#45c9b1;border-color:#2caa94;color:#06343b}
-.hero{padding:72px 0 44px;display:grid;grid-template-columns:1.05fr .95fr;gap:35px;align-items:end;position:relative;min-height:330px;overflow:hidden}.waveArt{position:absolute;right:-55px;top:8px;width:70%;height:330px;opacity:.96;pointer-events:none;z-index:0;overflow:hidden;border-radius:36px 0 0 36px;mask-image:linear-gradient(90deg,transparent 0,#000 18%,#000 100%);box-shadow:0 18px 42px rgba(7,75,84,.12)}.naturePhoto img{width:100%;height:100%;display:block;object-fit:cover;filter:saturate(.9) contrast(.96)}.photoShade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(234,247,246,1) 0%,rgba(234,247,246,.72) 18%,rgba(234,247,246,.18) 55%,rgba(7,59,70,.08) 100%)}.hero:after{display:none}.heroCopy,.heroSearch{position:relative;z-index:1}.heroSearch{align-self:end}.heroCopy{padding-bottom:4px}.natureGallery{display:grid;grid-template-columns:1.15fr .9fr .9fr;gap:12px;margin:4px 0 22px}.natureGallery figure{margin:0;position:relative;height:108px;border-radius:17px;overflow:hidden;background:#cfe5e1}.natureGallery img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.88) contrast(.95)}.natureGallery figure:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(4,42,49,.48) 100%)}.natureGallery figcaption{position:absolute;left:12px;bottom:10px;z-index:1;color:#fff;font-size:11px;font-weight:850;text-shadow:0 1px 5px rgba(0,0,0,.25)}.natureRibbon{height:74px;margin:0 0 18px;overflow:hidden;border-radius:0 0 28px 28px;opacity:.95}.natureRibbon svg{display:block;width:100%;height:100%}.natureSection{position:relative;overflow:hidden}.natureTop{height:38px;display:flex;align-items:flex-end;gap:6px;margin-bottom:10px;opacity:.8}.natureTop span{display:block;background:#477b62;border-radius:100% 0 100% 0;width:15px;height:25px;transform:rotate(-14deg)}.natureTop span:nth-child(2){height:34px;transform:rotate(12deg)}.natureTop span:nth-child(3){height:20px;transform:rotate(-28deg)}.naturePebbles{position:absolute;right:8px;top:18px;display:flex;gap:7px;align-items:flex-end;opacity:.75}.naturePebbles i{display:block;background:#71817e;border-radius:50%;width:16px;height:11px;transform:rotate(-8deg)}.naturePebbles i:nth-child(2){width:24px;height:15px;background:#5f7472}.naturePebbles i:nth-child(3){width:11px;height:8px;background:#87918c}.naturePebbles i:nth-child(4){width:20px;height:12px;background:#687a77}.hero:after{content:"";position:absolute;right:-80px;top:5px;width:360px;height:190px;background:linear-gradient(135deg,#59d8d0aa,#56b9df55);filter:blur(18px);border-radius:58% 42% 61% 39%/45% 57% 43% 55%;pointer-events:none}.kicker{display:inline-block;background:#d8f5f1;color:#08727b;padding:7px 11px;border-radius:999px;font-weight:850;font-size:11px;position:relative;z-index:1}.hero h1{font-size:60px;line-height:1.02;letter-spacing:-.075em;margin:17px 0;position:relative;z-index:1}.hero p{font-size:17px;line-height:1.75;color:var(--muted);margin:0}
+.hero{padding:72px 0 44px;display:grid;grid-template-columns:1.05fr .95fr;gap:35px;align-items:end;position:relative;min-height:330px;overflow:hidden}.waveArt{display:none}.natureCanvas{position:absolute;inset:0;height:2200px;overflow:hidden;z-index:0;pointer-events:none;opacity:.82}.natureCanvas svg{width:100%;height:100%;display:block}.hero,.section,footer{position:relative;z-index:1}.heroSearch{align-self:end}.heroCopy{padding-bottom:4px}.natureRibbon{height:74px;margin:0 0 18px;overflow:hidden;border-radius:0 0 28px 28px;opacity:.95}.natureRibbon svg{display:block;width:100%;height:100%}.natureSection{position:relative;overflow:hidden}.natureTop{height:38px;display:flex;align-items:flex-end;gap:6px;margin-bottom:10px;opacity:.8}.natureTop span{display:block;background:#477b62;border-radius:100% 0 100% 0;width:15px;height:25px;transform:rotate(-14deg)}.natureTop span:nth-child(2){height:34px;transform:rotate(12deg)}.natureTop span:nth-child(3){height:20px;transform:rotate(-28deg)}.naturePebbles{position:absolute;right:8px;top:18px;display:flex;gap:7px;align-items:flex-end;opacity:.75}.naturePebbles i{display:block;background:#71817e;border-radius:50%;width:16px;height:11px;transform:rotate(-8deg)}.naturePebbles i:nth-child(2){width:24px;height:15px;background:#5f7472}.naturePebbles i:nth-child(3){width:11px;height:8px;background:#87918c}.naturePebbles i:nth-child(4){width:20px;height:12px;background:#687a77}.hero:after{content:"";position:absolute;right:-80px;top:5px;width:360px;height:190px;background:linear-gradient(135deg,#59d8d0aa,#56b9df55);filter:blur(18px);border-radius:58% 42% 61% 39%/45% 57% 43% 55%;pointer-events:none}.kicker{display:inline-block;background:#d8f5f1;color:#08727b;padding:7px 11px;border-radius:999px;font-weight:850;font-size:11px;position:relative;z-index:1}.hero h1{font-size:60px;line-height:1.02;letter-spacing:-.075em;margin:17px 0;position:relative;z-index:1}.hero p{font-size:17px;line-height:1.75;color:var(--muted);margin:0}
 .search{display:flex;background:rgba(252,255,255,.92);border:1px solid #cde5e3;border-radius:17px;padding:6px;box-shadow:0 18px 42px rgba(11,91,98,.10);position:relative;z-index:1}.search input{flex:1;border:0;outline:0;background:transparent;padding:14px}.search button{border:0;background:#0b7584;color:#fff;border-radius:11px;padding:0 20px;font-weight:900}
 .pills{display:flex;gap:8px;overflow:auto;padding:4px 0 8px}.pill{white-space:nowrap}.pill.active{background:var(--dark);color:#fff;border-color:var(--dark);box-shadow:0 8px 18px rgba(6,59,70,.12)}
 .section{padding:26px 0 50px}.section h2{font-size:28px;letter-spacing:-.055em;margin:0}.sub{font-size:13px;color:var(--muted);margin-top:4px}
@@ -29,7 +29,49 @@ footer{border-top:1px solid var(--line);padding:30px 0 60px;color:#6e8a8e;font-s
 @media(max-width:540px){.grid{grid-template-columns:1fr}.hero{min-height:500px}.waveArt{right:-200px;top:195px;width:148%;height:260px;opacity:.74}.hero h1{font-size:40px}.wrap{padding:0 16px}}
 </style>
 </head>
-<body>
+<body><div class="natureCanvas" aria-hidden="true"><svg viewBox="0 0 1600 2200" preserveAspectRatio="none">
+<defs>
+<linearGradient id="sea" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bfe9e8"/><stop offset=".55" stop-color="#55bfc7"/><stop offset="1" stop-color="#16748c"/></linearGradient>
+<linearGradient id="deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#117d92"/><stop offset="1" stop-color="#07516f"/></linearGradient>
+</defs>
+
+<!-- large ocean wave, integrated into the canvas -->
+<path d="M880 0 C1015 74 1138 98 1270 69 C1410 38 1495 77 1600 14 L1600 540 C1492 522 1413 476 1318 432 C1200 378 1119 332 1010 358 C900 384 818 486 708 472 C609 459 584 384 646 307 C713 224 773 62 880 0Z" fill="url(#sea)" opacity=".92"/>
+<path d="M892 34 C1004 106 1120 126 1244 101 C1371 76 1477 108 1600 54" fill="none" stroke="#e9fffb" stroke-opacity=".62" stroke-width="18" stroke-linecap="round"/>
+<path d="M770 334 C832 275 876 184 930 139 C979 99 1031 114 1085 152 C1130 183 1181 226 1243 242 C1322 262 1401 244 1496 195" fill="none" stroke="#f5fffe" stroke-opacity=".46" stroke-width="8" stroke-linecap="round"/>
+
+<!-- distant shoreline -->
+<path d="M0 620 C190 574 310 630 468 605 C628 580 734 534 888 568 C1039 603 1138 652 1283 628 C1417 606 1510 576 1600 556 L1600 735 C1407 709 1270 740 1106 712 C951 685 835 651 690 679 C538 709 404 749 245 724 C145 709 63 714 0 728Z" fill="#c5e3d8" opacity=".88"/>
+<path d="M0 665 C176 623 313 678 475 652 C627 628 726 581 877 613 C1001 639 1136 692 1276 665 C1417 638 1502 616 1600 593" fill="none" stroke="#6ea797" stroke-width="5" opacity=".65"/>
+
+<!-- rocks, scattered rather than boxed -->
+<g opacity=".93">
+ <path d="M52 818 C66 775 122 747 174 764 C203 774 228 807 219 843 C208 882 154 898 95 889 C57 883 40 854 52 818Z" fill="#657977"/>
+ <path d="M126 795 C145 773 177 772 195 792 C204 803 204 816 197 829 C170 835 145 831 126 817Z" fill="#91a29e" opacity=".7"/>
+ <path d="M1380 760 C1414 721 1478 716 1519 743 C1548 762 1564 800 1546 833 C1519 881 1438 885 1388 855 C1362 838 1360 793 1380 760Z" fill="#536d70"/>
+ <path d="M1403 753 C1435 736 1470 739 1496 757" fill="none" stroke="#9aacaa" stroke-opacity=".65" stroke-width="8" stroke-linecap="round"/>
+ <path d="M1312 2020 C1340 1970 1410 1946 1466 1968 C1515 1986 1534 2032 1510 2072 C1477 2125 1392 2132 1340 2099 C1301 2075 1294 2050 1312 2020Z" fill="#71827f"/>
+ <path d="M1337 1989 C1374 1973 1411 1978 1445 1995" fill="none" stroke="#a8b6b1" stroke-opacity=".55" stroke-width="7" stroke-linecap="round"/>
+</g>
+
+<!-- tall grasses and reeds along page margins -->
+<g fill="none" stroke="#397a62" stroke-width="6" stroke-linecap="round" opacity=".85">
+ <path d="M90 1160 Q70 1100 57 1055 M90 1160 Q91 1102 111 1035 M90 1160 Q119 1110 146 1070 M90 1160 Q58 1120 32 1097"/>
+ <path d="M1497 1182 Q1480 1118 1467 1070 M1497 1182 Q1498 1117 1518 1048 M1497 1182 Q1525 1120 1554 1084 M1497 1182 Q1466 1142 1440 1120"/>
+ <path d="M179 1908 Q167 1850 150 1803 M179 1908 Q184 1848 205 1784 M179 1908 Q209 1854 236 1812"/>
+ <path d="M1113 2138 Q1105 2087 1087 2050 M1113 2138 Q1118 2078 1134 2028 M1113 2138 Q1140 2093 1162 2066"/>
+</g>
+
+<!-- subtle ground texture -->
+<path d="M0 950 C230 914 360 968 538 945 C730 920 874 874 1055 910 C1260 951 1410 1004 1600 958 L1600 1048 C1390 1091 1223 1037 1046 1009 C869 981 710 1028 538 1050 C340 1074 191 1016 0 1047Z" fill="#d6ece4" opacity=".38"/>
+<path d="M0 1550 C174 1517 312 1570 475 1544 C632 1519 759 1474 923 1502 C1102 1533 1258 1580 1429 1557 C1491 1549 1547 1538 1600 1524" fill="none" stroke="#77ad9e" stroke-opacity=".3" stroke-width="4"/>
+
+<!-- small wildflowers -->
+<g fill="#5d9a78" opacity=".8">
+ <circle cx="278" cy="1760" r="5"/><circle cx="297" cy="1736" r="4"/><circle cx="318" cy="1756" r="5"/>
+ <circle cx="1212" cy="1470" r="5"/><circle cx="1232" cy="1450" r="4"/><circle cx="1248" cy="1472" r="4"/>
+</g>
+</svg></div>
 <header><div class="wrap nav">
 <a class="logo" href="/">틈<small>TEUM</small></a>
 <nav class="navlinks"><a href="#feed">마켓</a><a href="#wanted">구합니다</a><a href="#lesson">레슨</a><a href="#made">수제품</a></nav>
@@ -37,24 +79,14 @@ footer{border-top:1px solid var(--line);padding:30px 0 60px;color:#6e8a8e;font-s
 </div></header>
 <main class="wrap">
 <section class="hero">
-<div class="waveArt naturePhoto" aria-hidden="true"><img src="https://images.unsplash.com/photo-1710503523501-4d186e4f5f32?auto=format&fit=crop&fm=jpg&q=82&w=1400" alt=""><div class="photoShade"></div></div><div class="heroCopy"><span class="kicker">NEED × CAN DO</span><h1>필요한 사람과<br>할 수 있는 사람.</h1><p>물건을 사고팔고, 저렴하게 배우고,<br>남는 시간과 재능까지 서로 연결합니다.</p></div>
+<div class="heroCopy"><span class="kicker">NEED × CAN DO</span><h1>필요한 사람과<br>할 수 있는 사람.</h1><p>물건을 사고팔고, 저렴하게 배우고,<br>남는 시간과 재능까지 서로 연결합니다.</p></div>
 <div class="heroSearch"><div class="search"><input id="q" placeholder="기타, 일본어, 아이패드, 사진 촬영..."><button onclick="loadPosts()">찾기</button></div><div class="small" style="margin:9px 4px">가장 먼저 <b>구합니다</b>를 찾아보세요.</div></div>
 </section>
-<div class="pills" id="pills"></div><div class="natureGallery"><figure><img src="https://images.unsplash.com/photo-1741526179588-c6e13e956309?auto=format&fit=crop&fm=jpg&q=82&w=900" alt=""><figcaption>바다와 바위</figcaption></figure><figure><img src="https://images.unsplash.com/photo-1710503523501-4d186e4f5f32?auto=format&fit=crop&fm=jpg&q=82&w=900" alt=""><figcaption>풀과 해안</figcaption></figure><figure><img src="https://images.unsplash.com/photo-1759063916155-56c2f82bbf0c?auto=format&fit=crop&fm=jpg&q=82&w=900" alt=""><figcaption>파도와 돌</figcaption></figure></div><div class="natureRibbon" aria-hidden="true">
-<svg viewBox="0 0 1200 110" preserveAspectRatio="none">
-  <path d="M0 78 C120 56 174 92 286 72 C405 50 466 30 582 51 C704 73 760 94 872 67 C1000 36 1072 53 1200 30 L1200 110 L0 110 Z" fill="#d2eee6"/>
-  <path d="M0 84 C120 62 176 97 290 78 C409 57 470 37 585 57 C705 79 761 99 875 73 C1003 43 1073 60 1200 37" fill="none" stroke="#79b9a6" stroke-width="3"/>
-  <g stroke="#4d876d" stroke-width="3" stroke-linecap="round">
-    <path d="M118 92 Q113 73 107 66 M118 92 Q120 71 128 63 M118 92 Q130 78 140 74"/>
-    <path d="M466 83 Q461 66 453 60 M466 83 Q469 66 477 57 M466 83 Q478 72 487 69"/>
-    <path d="M945 88 Q940 69 932 63 M945 88 Q948 69 956 59 M945 88 Q957 77 967 73"/>
-  </g>
-  <circle cx="305" cy="81" r="9" fill="#6f7e79"/><circle cx="1027" cy="67" r="12" fill="#607470"/>
-</svg></div>
+<div class="pills" id="pills"></div>
 <section class="section" id="feed"><h2>지금 올라온 것</h2><div class="sub">가까운 거래와 새로운 재능</div><div id="cards" class="grid"></div></section>
 <section class="section" id="wanted"><h2>🔎 사람들이 구합니다</h2><div class="sub">수요가 먼저 올라오면 공급이 찾아옵니다.</div><div id="wcards" class="grid"></div></section>
-<section class="section natureSection" id="lesson"><div class="natureTop" aria-hidden="true"><span></span><span></span><span></span></div><div class="feature"><div class="featurebox"><span>LESSON</span><h3>내가 아는 걸<br>저렴하게 가르쳐요.</h3><p>기타 · 언어 · 공부 · 영상 · 음악</p></div><div class="featurebox lime"><span>HANDMADE & SERVICE</span><h3>남는 시간과<br>재능도 상품이 됩니다.</h3><p>수제품 · 사진 · PC 도움 · 작은 서비스</p></div></div></section>
-<section class="section natureSection" id="made"><div class="naturePebbles" aria-hidden="true"><i></i><i></i><i></i><i></i></div><h2>틈의 원칙</h2><div class="sub">비싸게가 아니라, 서로에게 필요한 가격으로.</div></section>
+<section class="section" id="lesson"><div class="feature"><div class="featurebox"><span>LESSON</span><h3>내가 아는 걸<br>저렴하게 가르쳐요.</h3><p>기타 · 언어 · 공부 · 영상 · 음악</p></div><div class="featurebox lime"><span>HANDMADE & SERVICE</span><h3>남는 시간과<br>재능도 상품이 됩니다.</h3><p>수제품 · 사진 · PC 도움 · 작은 서비스</p></div></div></section>
+<section class="section" id="made"><h2>틈의 원칙</h2><div class="sub">비싸게가 아니라, 서로에게 필요한 가격으로.</div></section>
 </main>
 <footer><div class="wrap">틈 TEUM · 필요한 사람과 할 수 있는 사람을 연결합니다.</div></footer>
 <nav class="bottom"><button onclick="window.scrollTo({top:0,behavior:'smooth'})"><b>⌂</b>홈</button><button onclick="location.hash='wanted'"><b>⌕</b>구합니다</button><button onclick="postForm()"><b>＋</b>올리기</button><button onclick="messages()"><b>☷</b>메시지</button><button onclick="auth()"><b>○</b>내 정보</button></nav>
