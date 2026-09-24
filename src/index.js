@@ -186,6 +186,9 @@ export default {
       else if(["/api/messages","/api/messages/match","/api/favorites","/api/block","/api/profile","/api/review","/api/report","/api/submissions","/api/admin/submissions","/api/admin/matches","/api/admin/overview","/api/admin/posts","/api/admin/reports","/api/admin/users","/api/admin/logout"].includes(url.pathname)||url.pathname==="/api/upload"||url.pathname==="/apply"||url.pathname.indexOf("/api/posts/")===0){binding="TEUM_WRITE_LIMIT";key=(cookiesFromRequest(request).teum||request.headers.get("cf-connecting-ip")||"unknown")+":"+url.pathname.split("/").slice(0,4).join("/")}
       if(binding&&await limited(env,binding,key))return secure(j({error:"요청이 너무 많습니다. 잠시 후 다시 시도해주세요."},429,{"Retry-After":"60"}));
     }
+    if (url.pathname === "/google2859b89f90c0c176.html" && request.method === "GET") {
+      return secure(new Response("google-site-verification: google2859b89f90c0c176.html", {headers: {"content-type":"text/html; charset=utf-8","cache-control":"public, max-age=3600"}}));
+    }
     if (url.pathname === "/robots.txt" && request.method === "GET") {
       return secure(new Response("User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\n\nSitemap: https://teum.hojuy0921.workers.dev/sitemap.xml\n", {headers: {"content-type":"text/plain; charset=utf-8","cache-control":"public, max-age=3600"}}));
     }
