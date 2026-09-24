@@ -101,7 +101,8 @@ async function api(u,o){o=o||{};var opt=Object.assign({},o,{credentials:"include
 function modal(h){$("#modal").innerHTML=h;$("#bg").style.display="flex";if(TURNSTILE_SITEKEY&&window.turnstile&&$("#turnstileSlot")){setTimeout(function(){try{turnstileWidget=window.turnstile.render($("#turnstileSlot"),{sitekey:TURNSTILE_SITEKEY})}catch(e){}},0)}}
 function closeModal(){$("#bg").style.display="none";turnstileWidget=null}
 $("#bg").addEventListener("click",function(e){if(e.target.id==="bg")closeModal()})
-function turnstileToken(){try{return window.turnstile&&turnstileWidget!==null?window.turnstile.getResponse(turnstileWidget):""}catch(e){return ""}}\nfunction turnstileBox(){return TURNSTILE_SITEKEY?"<div id=\"turnstileSlot\" class=\"turnstileBox\"></div>":""}\nfunction toast(t){$("#toast").textContent=t;$("#toast").style.display="block";setTimeout(function(){$("#toast").style.display="none"},1800)}
+function turnstileToken(){try{return window.turnstile&&turnstileWidget!==null?window.turnstile.getResponse(turnstileWidget):""}catch(e){return ""}}
+function turnstileBox(){return TURNSTILE_SITEKEY?"<div id="turnstileSlot" class="turnstileBox"></div>":""}\nfunction toast(t){$("#toast").textContent=t;$("#toast").style.display="block";setTimeout(function(){$("#toast").style.display="none"},1800)}
 $("#pills").innerHTML=cats.map(function(c){return '<button class="btn pill '+(c==="전체"?"active":"")+'" data-cat="'+esc(c)+'">'+esc(c)+'</button>'}).join("")
 document.querySelectorAll(".pill").forEach(function(el){el.addEventListener("click",function(){active=el.getAttribute("data-cat");document.querySelectorAll(".pill").forEach(function(x){x.classList.remove("active")});el.classList.add("active");loadPosts()})})
 $("#q").addEventListener("keydown",function(e){if(e.key==="Enter")loadPosts()})
@@ -195,25 +196,32 @@ export default {
       }
     }
     if (url.pathname === "/api/admin-check" && request.method === "GET") {
-      return j({version:"1506",adminConfigured:!!String(env.TEUM_ADMIN_KEY||"").trim()});
+      return secure(j({version:"1507",adminConfigured:!!String(env.TEUM_ADMIN_KEY||"").trim(),turnstileConfigured:!!String(env.TEUM_TURNSTILE_SITEKEY||"").trim()&&!!String(env.TEUM_TURNSTILE_SECRET||"").trim()}));
     }
     if (url.pathname === "/admin") return secure(new Response(ADMIN, {headers: {"content-type":"text/html; charset=utf-8","cache-control":"no-store"}}));
     if (url.pathname.startsWith("/api/")) {
       const id = env.TEUM_DB.idFromName("global");
+      if (url.pathname === "/api/admin/login") {
+        if(request.method!=="POST") return secure(j({error:"허용되지 않는 요청입니다."},405));
+        const body=await request.json().catch(function(){return {}});const expected=String(env.TEUM_ADMIN_KEY||"").trim().normalize("NFKC");const actual=String(body.key||"").trim().normalize("NFKC");
+        if(!expected)return secure(j({error:"Cloudflare에 TEUM_ADMIN_KEY Secret이 설정되지 않았습니다."},500));
+        if(!actual||actual!==expected)return secure(j({error:"관리자 키가 올바르지 않습니다."},401));
+        const forwarded=new Request(new URL("/api/admin/login",request.url),{method:"POST",headers:new Headers({"Content-Type":"application/json","x-teum-admin-internal":"1"}),body:"{}"});
+        const result=await env.TEUM_DB.get(id).fetch(forwarded);const data=await result.json().catch(function(){return {}});
+        if(!result.ok)return secure(j(data,result.status));
+        return secure(j({ok:true},200,{"Set-Cookie":"teum_admin="+encodeURIComponent(String(data.token||""))+"; HttpOnly; Path=/; SameSite=Strict; Secure; Max-Age=28800"}));
+      }
       if (url.pathname === "/api/admin/submissions" || (url.pathname.indexOf("/api/admin/submissions/") === 0 && url.pathname.endsWith("/status")) || url.pathname === "/api/admin/matches") {
-        if (request.method !== "POST") return j({error:"허용되지 않는 요청입니다."},405);
-        const body = await request.json().catch(function(){return {};});
-        const expected = String(env.TEUM_ADMIN_KEY || "").trim().normalize("NFKC");
-        const actual = String(body.key || "").trim().normalize("NFKC");
-        if (!expected) return j({error:"Cloudflare에 TEUM_ADMIN_KEY Secret이 설정되지 않았습니다."},500);
-        if (!actual || actual !== expected) return j({error:"관리자 키가 올바르지 않습니다."},401);
-        delete body.key;
-        const headers = new Headers({"Content-Type":"application/json","x-teum-admin-internal":"1"});
-        const forwarded = new Request(new URL(url.pathname + url.search, request.url), {
-          method:"POST",
-          headers,
-          body:JSON.stringify(body)
-        });
+        if (request.method !== "POST") return secure(j({error:"허용되지 않는 요청입니다."},405));
+        const body = await request.json().catch(function(){return {}});
+        const expected = String(env.TEUM_ADMIN_KEY||"").trim().normalize("NFKC");
+        const actual = String(body.key||"").trim().normalize("NFKC");
+        const adminCookie=cookiesFromRequest(request).teum_admin||"";
+        const headers=new Headers({"Content-Type":"application/json"});
+        if(actual&&expected&&actual===expected){delete body.key;headers.set("x-teum-admin-internal","1")}
+        else if(adminCookie){headers.set("Cookie","teum_admin="+encodeURIComponent(adminCookie))}
+        else return secure(j({error:"관리자 인증이 필요합니다."},401));
+        const forwarded=new Request(new URL(url.pathname+url.search,request.url),{method:"POST",headers:headers,body:JSON.stringify(body)});
         return secure(await env.TEUM_DB.get(id).fetch(forwarded));
       }
       return secure(await env.TEUM_DB.get(id).fetch(request));
@@ -313,7 +321,7 @@ export class TeumDatabase extends DurableObject {
   authorizedKey(req){return req.headers.get("x-teum-admin-internal")==="1"}
   adminSessionOk(req){const token=cookies(req).teum_admin||req.headers.get("x-teum-admin-session")||"";if(!token)return false;return !!this.sql.exec("SELECT token FROM admin_sessions WHERE token=? AND expires>?",token,Date.now()).toArray()[0]}
   authorizedAdmin(req){return this.authorizedKey(req)||this.adminSessionOk(req)}
-  async submitRequest(req){const ct=String(req.headers.get("content-type")||"").toLowerCase();let b={};if(ct.includes("application/json")){b=await req.json()}else{const f=await req.formData();b=Object.fromEntries(f.entries())}const v={type:String(b.type||""),nickname:String(b.nickname||"").trim(),title:String(b.title||"").trim(),city:String(b.city||"").trim(),price:String(b.price||"").trim(),time:String(b.time||"").trim(),description:String(b.description||"").trim(),contact:String(b.contact||"").trim(),consent:String(b.consent||"")};if(!TYPES.includes(v.type)||!v.nickname||!v.title||!v.description||!v.contact||v.consent!=="yes")return j({error:"필수 항목을 모두 입력해주세요."},400);const owner=this.me(req);this.sql.exec("INSERT INTO submissions(type,nickname,title,city,price,time,description,contact,consent,status,user_id) VALUES(?,?,?,?,?,?,?,?,?,'PENDING',?)",v.type,v.nickname.slice(0,40),v.title.slice(0,120),v.city.slice(0,80),v.price.slice(0,50),v.time.slice(0,100),v.description.slice(0,4000),v.contact.slice(0,300),v.consent,owner?owner.id:null);if(!ct.includes("application/json"))return new Response("<!doctype html><html lang='ko'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>TEUM 등록 완료</title><style>body{margin:0;background:#f5f2ea;color:#171717;font-family:Arial,'Noto Sans KR',sans-serif}.box{max-width:700px;margin:80px auto;background:#fffdf8;border:1px solid #e5dfd4;border-radius:20px;padding:32px}a{display:inline-block;background:#171717;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:800}</style></head><body><div class='box'><h1>등록 완료</h1><p>TEUM 운영자가 확인하고 조건이 맞는 사람을 찾아 연결해드릴게요.</p><a href='/'>TEUM으로 돌아가기</a></div></body></html>",{status:201,headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});return j({ok:true},201)}
+  async submitRequest(req){const ct=String(req.headers.get("content-type")||"").toLowerCase();let b={};if(ct.includes("application/json")){b=await req.json()}else{const f=await req.formData();b=Object.fromEntries(f.entries())}const v={type:String(b.type||""),nickname:String(b.nickname||"").trim(),title:String(b.title||"").trim(),city:String(b.city||"").trim(),price:String(b.price||"").trim(),time:String(b.time||"").trim(),description:String(b.description||"").trim(),contact:String(b.contact||"").trim(),consent:String(b.consent||""),turnstile_token:String(b.turnstile_token||"")};if(!(await verifyTurnstile(this.env.TEUM_TURNSTILE_SECRET,v.turnstile_token,req.headers.get("cf-connecting-ip"))))return j({error:"보안 확인에 실패했습니다. 다시 시도해주세요."},403);if(!TYPES.includes(v.type)||!v.nickname||!v.title||!v.description||!v.contact||v.consent!=="yes")return j({error:"필수 항목을 모두 입력해주세요."},400);const owner=this.me(req);this.sql.exec("INSERT INTO submissions(type,nickname,title,city,price,time,description,contact,consent,status,user_id) VALUES(?,?,?,?,?,?,?,?,?,'PENDING',?)",v.type,v.nickname.slice(0,40),v.title.slice(0,120),v.city.slice(0,80),v.price.slice(0,50),v.time.slice(0,100),v.description.slice(0,4000),v.contact.slice(0,300),v.consent,owner?owner.id:null);if(!ct.includes("application/json"))return new Response("<!doctype html><html lang='ko'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>TEUM 등록 완료</title><style>body{margin:0;background:#f5f2ea;color:#171717;font-family:Arial,'Noto Sans KR',sans-serif}.box{max-width:700px;margin:80px auto;background:#fffdf8;border:1px solid #e5dfd4;border-radius:20px;padding:32px}a{display:inline-block;background:#171717;color:#fff;text-decoration:none;padding:12px 16px;border-radius:10px;font-weight:800}</style></head><body><div class='box'><h1>등록 완료</h1><p>TEUM 운영자가 확인하고 조건이 맞는 사람을 찾아 연결해드릴게요.</p><a href='/'>TEUM으로 돌아가기</a></div></body></html>",{status:201,headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store"}});return j({ok:true},201)}
   async adminSubmissions(req){if(!this.authorizedKey(req))return j({error:"관리자 인증이 필요합니다."},401);const rows=this.sql.exec("SELECT * FROM submissions ORDER BY id DESC LIMIT 300").toArray();return j({entries:rows.map(x=>Object.assign({},x,{matches:this.submissionMatches(x.id)})),stats:{total:rows.length,pending:rows.filter(x=>x.status==="PENDING").length}})}
   syncApprovedSubmissions(){const operator=this.sql.exec("SELECT id FROM users WHERE username=?","__teum_operator__").toArray()[0];if(!operator)return;const rows=this.sql.exec("SELECT * FROM submissions WHERE status='APPROVED' ORDER BY id ASC LIMIT 300").toArray();rows.forEach(function(w){const tag="__teum_submission_"+w.id+"__";const ownerId=w.user_id||operator.id;const existing=this.sql.exec("SELECT id FROM posts WHERE tags=?",tag).toArray()[0];const raw=String(w.price||"").replace(/[^0-9]/g,"");const price=raw?Math.floor(Number(raw)):null;const desc=String(w.description||"")+(w.time?"\n\n가능한 시간: "+String(w.time):"");if(existing)this.sql.exec("UPDATE posts SET user_id=?,type=?,title=?,description=?,price=?,city=?,tags=?,status='OPEN' WHERE id=?",ownerId,w.type,w.title,desc,price,w.city||"",tag,existing.id);else this.sql.exec("INSERT INTO posts(user_id,type,title,description,price,city,tags,image,status) VALUES(?,?,?,?,?,?,?,?,?)",ownerId,w.type,w.title,desc,price,w.city||"",tag,"","OPEN")}.bind(this))}
   async adminMatch(req){
